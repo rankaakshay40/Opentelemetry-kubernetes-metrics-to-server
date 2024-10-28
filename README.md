@@ -14,6 +14,7 @@ helm install otel-collector open-telemetry/opentelemetry-collector \
   --set image.repository="otel/opentelemetry-collector-contrib" \
   --set mode=deployment
 
+We will see 
 
 
 

@@ -70,7 +70,6 @@ kubectl logs <pod-name>
 
 
 **Important Links:**
-Links:
 
 [https://opentelemetry.io/docs/collector/installation/ - install otel on Kubernetes](url)
 

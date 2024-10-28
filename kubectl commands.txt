@@ -1,0 +1,95 @@
+kubectl get ns
+
+To see all the namespaces
+
+kubectl config set-context --current --namespace=default
+
+To go to default namespace
+
+kubectl config view --minify | grep namespace:
+To see you are in which namespace
+
+kubectl get services -n 
+This is to get the Prometheus server IP and port
+
+
+kubectl get deployment,daemonset,statefulset -n <namespace>
+
+To see the pods running as deployment, daemonset or statefulset
+
+ kubectl get pods
+
+
+{Change hostNetwork: false} TO get the pods running in either deployment or damonset
+
+
+
+kubectl port-forward <node-exporter-pod-name> 9100:9100 -n aks
+
+kubectl port-forward svc/node-exporter-prometheus-node-exporter 9100
+
+
+
+kubectl get configmap <configmap-name> -n <namespace> -o yaml
+
+If you want to see the configmap yaml file as a cat command
+
+kubectl edit configmap otel-collector-opentelemetry-collector
+
+kubectl rollout restart deployment otel-collector-opentelemetry-collector
+
+ targets:
+              - 'node-exporter-prometheus-node-exporter.aks.svc.cluster.local:9100'  
+
+
+
+kubectl get ns
+
+To see all the namespaces
+
+
+kubectl config set-context --current --namespace=aks	
+
+To go to default namespace
+
+kubectl config view --minify | grep namespace:
+To see you are in which namespace
+
+kubectl get services -n 
+This is to get the Prometheus server IP and port
+
+kubectl get configmap otel-collector-conf -o yaml > otel-collector-conf.yaml
+
+
+kubectl create -f filename
+
+kubectl apply -f otel-agent-conf.yaml
+kubectl apply -f otel-collector-conf.yaml
+
+
+kubectl rollout restart daemonset/otel-agent
+kubectl rollout restart deployment/otel-collector
+
+kubectl logs <pod name>
+
+aws eks list-clusters --To get the cluster name
+
+=========================================
+
+77  kubectl get deployments
+  978  kubectl get pods
+  979  nano new-otel-config.yaml
+  980  kubectl apply -f new-otel-config.yaml
+  981  kubectl get pods
+  982  kubectl get svc
+  983  curl 127.0.0.1:9100
+  984  kubectl port-forward svc/test-node-exporter-prometheus-node-exporter 9100
+  985  kubectl logs otel-collector-7ffc78fd9d-sqxbr
+  986  kubectl config set-context --current --namespace=xmon-demo
+  987  kubectl get pods
+  988  kubectl delete pod otel-collector-7ffc78fd9d-sqxbr
+  989  kubectl get pods
+  990  kubectl get deployments
+  991  kubectl delete deployment otel-collector
+
+

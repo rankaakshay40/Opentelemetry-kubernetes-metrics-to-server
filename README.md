@@ -58,12 +58,15 @@ We can also use
 
 kubectl apply -f otel-collector-conf.yaml --force in some cases
 
+**Now to get the changes reflect, we need to restart the otel-collector pod.**
+
+kubectl delete pod <otel-collector pod name>
+
 **Now Check the logs for the pods to see if we are getting any error**
 
 kubectl logs <pod-name>
 
-
-
+**Check the Prometheus and Grafana Endpoint and see the metrics at port 9090 and 3000**
 
 
 **Important Links:**

@@ -14,7 +14,31 @@ helm install otel-collector open-telemetry/opentelemetry-collector \
   --set image.repository="otel/opentelemetry-collector-contrib" \
   --set mode=deployment
 
-We will see 
+Verify installation with the command:
+
+helm list -n aks
+
+Verify the pods 
+
+kubectl get pods -n [NAMESPACE]
+
+Now Get the configuration for the otel-collector in a file with this command
+
+kubectl get configmap otel-collector-conf -o yaml > otel-collector-conf.yaml
+
+Edit the otel-collector-conf.yaml
+
+Now apply the configuration changes
+
+kubectl apply -f otel-collector-conf.yaml
+
+We can also use 
+
+kubectl apply -f otel-collector-conf.yaml --force in some cases
+
+We will see a pod for kube-state metrics running and a pod for otel-collector agent running. 
+
+
 
 
 

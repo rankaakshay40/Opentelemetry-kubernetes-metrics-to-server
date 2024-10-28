@@ -69,6 +69,40 @@ kubectl logs <pod-name>
 **Check the Prometheus and Grafana Endpoint and see the metrics at port 9090 and 3000**
 
 
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+**Install Node Exporter Using Helm**
+**Add the Prometheus Community Helm Repo:**
+First, add the Prometheus Community Helm repository, which includes the Node Exporter chart:
+
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+helm repo update
+
+**Install the Node Exporter:**
+Use the following command to install the Node Exporter. You can customize the release name and namespace as needed:
+
+helm install node-exporter prometheus-community/prometheus-node-exporter
+
+Verify the Installation:
+
+Check that the Node Exporter pods are running:
+
+kubectl get pods -l app=prometheus-node-exporter
+
+**Check the node-exporter metrics on local via pod forward command**
+
+kubectl get svc --- Get the service name
+  
+kubectl port-forward svc/node-exporter-prometheus-node-exporter 9100
+
+**For pods**
+
+kubectl port-forward <node-exporter-pod-name> 9100:9100 -n aks
+
+Make Changes in the opentelemtry config file and apply the changes, restart the node-opentelemtry pods
+
+
 **Important Links:**
 
 [https://opentelemetry.io/docs/collector/installation/ - install otel on Kubernetes](url)

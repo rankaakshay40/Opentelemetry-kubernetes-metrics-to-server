@@ -38,7 +38,11 @@ All Pods with the app.kubernetes.io/name=prometheus-node-exporter.* label, scrap
 Set up RBAC for OpenTelemetry Metrics Collector
 This configuration uses the built-in Kubernetes service discovery, so you must set up the service account running the OpenTelemetry Collector with advanced permissions (compared to the default set). The following ClusterRole provides a good starting point.
 
-The Configuration for Cluster Role is 
+The Configuration for Cluster Role is[ https://github.com/rankaakshay40/Opentelemetry-xmon-kubernetes/blob/main/ClusterRole.yaml](url)
+
+To bind this to a ServiceAccount, use the following ClusterRoleBinding:
+
+The Configuration to ClusterRoleBinding is here:
 
 **Now apply the configuration changes**
 

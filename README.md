@@ -42,11 +42,13 @@ The Configuration for Cluster Role is[ https://github.com/rankaakshay40/Opentele
 
 To bind this to a ServiceAccount, use the following ClusterRoleBinding:
 
-The Configuration to ClusterRoleBinding is here:
+The Configuration to ClusterRoleBinding is here: [https://github.com/rankaakshay40/Opentelemetry-xmon-kubernetes/blob/main/CluserRoleBinding.yaml](url)
 
 **Now apply the configuration changes**
 
 kubectl apply -f otel-collector-conf.yaml
+kubectl apply -f ClusterRole.yaml
+kubectl apply -f ClusterRoleBinding.yaml
 
 We can also use 
 

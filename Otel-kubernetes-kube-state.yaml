@@ -1,0 +1,218 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: otel-collector-conf
+  labels:
+    app: opentelemetry
+    component: otel-collector-conf
+data:
+  otel-collector-config: |
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+            endpoint: ${env:MY_POD_IP}:4317
+          http:
+            endpoint: ${env:MY_POD_IP}:4318
+
+      prometheus:
+        config:
+          scrape_configs:
+          - job_name: 'node-exporter'
+            scrape_interval: 10s
+            static_configs:
+            - targets: ['172.20.106.94:9100']
+
+          - bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+            job_name: integrations/kubernetes/cadvisor
+            kubernetes_sd_configs:
+              - role: node
+            relabel_configs:
+              - replacement: kubernetes.default.svc.cluster.local:443
+                target_label: __address__
+              - regex: (.+)
+                replacement: /api/v1/nodes/$${1}/proxy/metrics/cadvisor
+                source_labels:
+                  - __meta_kubernetes_node_name
+                target_label: __metrics_path__
+            metric_relabel_configs:
+              - source_labels: [__name__]
+                action: keep
+                regex: 'container_cpu_cfs_periods_total|container_cpu_cfs_throttled_periods_total|container_cpu_usage_seconds_total|container_fs_reads_bytes_total|container_fs_reads_total|container_fs_writes_bytes_total|container_fs_writes_total|container_memory_cache|container_memory_rss|container_memory_swap|container_memory_working_set_bytes|container_network_receive_bytes_total|container_network_receive_packets_dropped_total|container_network_receive_packets_total|container_network_transmit_bytes_total|container_network_transmit_packets_dropped_total|container_network_transmit_packets_total|machine_memory_bytes'
+            scheme: https
+            tls_config:
+              ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+              insecure_skip_verify: false
+              server_name: kubernetes
+
+          - bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+            job_name: integrations/kubernetes/kubelet
+            kubernetes_sd_configs:
+              - role: node
+            relabel_configs:
+              - replacement: kubernetes.default.svc.cluster.local:443
+                target_label: __address__
+              - regex: (.+)
+                replacement: /api/v1/nodes/$${1}/proxy/metrics
+                source_labels:
+                  - __meta_kubernetes_node_name
+                target_label: __metrics_path__
+            metric_relabel_configs:
+              - source_labels: [__name__]
+                action: keep
+                regex: 'container_cpu_usage_seconds_total|kubelet_certificate_manager_client_expiration_renew_errors|kubelet_certificate_manager_client_ttl_seconds|kubelet_certificate_manager_server_ttl_seconds|kubelet_cgroup_manager_duration_seconds_bucket|kubelet_cgroup_manager_duration_seconds_count|kubelet_node_config_error|kubelet_node_name|kubelet_pleg_relist_duration_seconds_bucket|kubelet_pleg_relist_duration_seconds_count|kubelet_pleg_relist_interval_seconds_bucket|kubelet_pod_start_duration_seconds_bucket|kubelet_pod_start_duration_seconds_count|kubelet_pod_worker_duration_seconds_bucket|kubelet_pod_worker_duration_seconds_count|kubelet_running_container_count|kubelet_running_containers|kubelet_running_pod_count|kubelet_running_pods|kubelet_runtime_operations_errors_total|kubelet_runtime_operations_total|kubelet_server_expiration_renew_errors|kubelet_volume_stats_available_bytes|kubelet_volume_stats_capacity_bytes|kubelet_volume_stats_inodes|kubelet_volume_stats_inodes_used|kubernetes_build_info|namespace_workload_pod|rest_client_requests_total|storage_operation_duration_seconds_count|storage_operation_errors_total|volume_manager_total_volumes'
+            scheme: https
+            tls_config:
+              ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+              insecure_skip_verify: false
+              server_name: kubernetes
+
+          - job_name: integrations/kubernetes/kube-state-metrics
+            kubernetes_sd_configs:
+              - role: pod
+            relabel_configs:
+              - action: keep
+                regex: kube-state-metrics
+                source_labels:
+                  - __meta_kubernetes_pod_label_app_kubernetes_io_name
+            metric_relabel_configs:
+              - source_labels: [__name__]
+                action: keep
+                regex: 'kube_daemonset.*|kube_deployment_metadata_generation|kube_deployment_spec_replicas|kube_deployment_status_observed_generation|kube_deployment_status_replicas_available|kube_deployment_status_replicas_updated|kube_horizontalpodautoscaler_spec_max_replicas|kube_horizontalpodautoscaler_spec_min_replicas|kube_horizontalpodautoscaler_status_current_replicas|kube_horizontalpodautoscaler_status_desired_replicas|kube_job.*|kube_namespace_status_phase|kube_node.*|kube_persistentvolumeclaim_resource_requests_storage_bytes|kube_pod_container_info|kube_pod_container_resource_limits|kube_pod_container_resource_requests|kube_pod_container_status_last_terminated_reason|kube_pod_container_status_restarts_total|kube_pod_container_status_waiting_reason|kube_pod_info|kube_pod_owner|kube_pod_start_time|kube_pod_status_phase|kube_pod_status_reason|kube_replicaset.*|kube_resourcequota|kube_statefulset.*'
+
+
+
+    processors:
+      batch:
+      memory_limiter:
+        # 80% of maximum memory up to 2G
+        limit_mib: 1500
+        # 25% of limit up to 2G
+        spike_limit_mib: 512
+        check_interval: 5s
+    extensions:
+      zpages: {}
+
+
+    exporters:
+      otlp:
+        endpoint: "http://someotlp.target.com:4317" # Replace with a real endpoint.
+        tls:
+          insecure: true
+
+      prometheusremotewrite:
+        endpoint: http://10.132.143.56:9090/api/v1/write # Make sure to specify the port.
+        remote_write_queue:
+          enabled: false
+          num_consumers: 20
+          queue_size: 20000
+
+        external_labels:
+          cluster: 'chaos-litmus-useast1'
+
+
+
+      debug:
+        verbosity: detailed
+
+
+    service:
+      extensions: [zpages]
+      pipelines:
+
+        metrics:
+          receivers: [prometheus]
+          processors: [batch, memory_limiter]
+          exporters: [prometheusremotewrite, debug]
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: otel-collector
+  labels:
+    app: opentelemetry
+    component: otel-collector
+spec:
+  ports:
+  - name: otlp-grpc # Default endpoint for OpenTelemetry gRPC receiver.
+    port: 4317
+    protocol: TCP
+    targetPort: 4317
+  - name: otlp-http # Default endpoint for OpenTelemetry HTTP receiver.
+    port: 4318
+    protocol: TCP
+    targetPort: 4318
+  - name: metrics # Default endpoint for querying metrics.
+    port: 8888
+  selector:
+    component: otel-collector
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: otel-collector
+  labels:
+    app: opentelemetry
+    component: otel-collector
+spec:
+  selector:
+    matchLabels:
+      app: opentelemetry
+      component: otel-collector
+  minReadySeconds: 5
+  progressDeadlineSeconds: 120
+  replicas: 1 #TODO - adjust this to your own requirements
+  template:
+    metadata:
+      labels:
+        app: opentelemetry
+        component: otel-collector
+    spec:
+      containers:
+      - command:
+          - "/otelcol"
+          - "--config=/conf/otel-collector-config.yaml"
+        image: otel/opentelemetry-collector:latest
+        name: otel-collector
+        resources:
+          limits:
+            cpu: 1
+            memory: 2Gi
+          requests:
+            cpu: 200m
+            memory: 400Mi
+        ports:
+        - containerPort: 55679 # Default endpoint for ZPages.
+        - containerPort: 4317 # Default endpoint for OpenTelemetry receiver.
+        - containerPort: 14250 # Default endpoint for Jaeger gRPC receiver.
+        - containerPort: 14268 # Default endpoint for Jaeger HTTP receiver.
+        - containerPort: 9411 # Default endpoint for Zipkin receiver.
+        - containerPort: 8888  # Default endpoint for querying metrics.
+        env:
+          - name: MY_POD_IP
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: status.podIP
+          - name: GOMEMLIMIT
+            value: 1600MiB
+        volumeMounts:
+        - name: otel-collector-config-vol
+          mountPath: /conf
+#        - name: otel-collector-secrets
+#          mountPath: /secrets
+      volumes:
+        - configMap:
+            name: otel-collector-conf
+            items:
+              - key: otel-collector-config
+                path: otel-collector-config.yaml
+          name: otel-collector-config-vol
+#        - secret:
+#            name: otel-collector-secrets
+#            items:
+#              - key: cert.pem
+#                path: cert.pem
+#              - key: key.pem
+#                path: key.pem

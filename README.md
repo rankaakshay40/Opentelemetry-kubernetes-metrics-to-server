@@ -27,6 +27,19 @@ kubectl get configmap otel-collector-conf -o yaml > otel-collector-conf.yaml
 
 **Edit the otel-collector-conf.yaml**
 
+This configuration adds four scrape targets with specific functions for discovery and scraping:
+
+All Nodes, scraping their cAdvisor endpoint (integrations/kubernetes/cadvisor)
+All Nodes, scraping their Kubelet metrics endpoint (integrations/kubernetes/kubelet)
+All Pods with the app.kubernetes.io/name=kube-state-metrics label, scraping their /metrics endpoint (integrations/kubernetes/kube-state-metrics)
+All Pods with the app.kubernetes.io/name=prometheus-node-exporter.* label, scraping their /metrics endpoint (integrations/node_exporter)
+
+
+Set up RBAC for OpenTelemetry Metrics Collector
+This configuration uses the built-in Kubernetes service discovery, so you must set up the service account running the OpenTelemetry Collector with advanced permissions (compared to the default set). The following ClusterRole provides a good starting point.
+
+The Configuration for Cluster Role is 
+
 **Now apply the configuration changes**
 
 kubectl apply -f otel-collector-conf.yaml

@@ -14,6 +14,10 @@ helm install otel-collector open-telemetry/opentelemetry-collector \
   --set image.repository="otel/opentelemetry-collector-contrib" \
   --set mode=deployment
 
+**This will get us the name of the cluster in aws**
+
+aws eks list-clusters
+
 **Verify installation with the command:**
 helm list -n aks
 

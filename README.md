@@ -46,7 +46,23 @@ The Configuration for Cluster Role is here: [ https://github.com/rankaakshay40/O
 
 To bind this to a ServiceAccount, use the following ClusterRoleBinding:
 
-The Configuration to ClusterRoleBinding is here: [https://github.com/rankaakshay40/Opentelemetry-xmon-kubernetes/blob/main/CluserRoleBinding.yaml](url)
+The Configuration to ClusterRoleBinding is here:
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: otel-collector
+subjects:
+  - kind: ServiceAccount
+    name: otel-collector # replace with your service account name
+    namespace: aks # replace with your namespace
+roleRef:
+  kind: ClusterRole
+  name: otel-collector
+  apiGroup: rbac.authorization.k8s.io
+
+
+[https://github.com/rankaakshay40/Opentelemetry-xmon-kubernetes/blob/main/CluserRoleBinding.yaml](url)
 
 **Now apply the configuration changes**
 

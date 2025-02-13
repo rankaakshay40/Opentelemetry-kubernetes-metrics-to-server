@@ -1,4 +1,4 @@
-**Run the following commands from your shell to install kube-state-metrics into the default namespace of your Kubernetes Cluster:**
+**Run the following commands from your shell to install kube-state-metrics into the default namespace of your Kubernetes Cluster**
 
 helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 helm repo update
